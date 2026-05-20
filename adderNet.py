@@ -228,6 +228,26 @@ class Value:
 
     out._backward = _backward
     return out
+  
+  def log(self):
+    """
+    @brief Logarithm function.
+
+    Computes:
+        log(x)
+
+    @return Value node representing log(self).
+    """
+
+    x = self.data
+    out = Value(math.log(x), (self, ), 'exp')
+
+    def _backward():
+      # d/dx log(x) = 1/x
+      self.grad += out.grad / x
+
+    out._backward = _backward
+    return out
 
   def relu(self):
     out = Value(max(0, self.data), (self,), "ReLU")
@@ -382,5 +402,15 @@ class MLP:
       """
 
       return [p for layer in self.layers for p in layer.parameters()]
+  
+  def zero_grad(self):
+    for p in self.parameters():
+      p.grad = 0.0
+
+  def step(self,learning_rate):
+    for p in self.parameters():
+      p.data += -learning_rate * p.grad
+
+
 
 
